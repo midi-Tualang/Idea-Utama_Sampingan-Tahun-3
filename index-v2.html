@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cabaran Pengembara Bijak: Idea Utama & Sampingan</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 850px;
+            background: #ffffff;
+            margin: 30px 15px;
+            border-radius: 24px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+            padding: 30px;
+            border: 4px solid #b2dfdb;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Top Bar Styling */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px dashed #b2dfdb;
+        }
+
+        .score-board {
+            background: #fff9c4;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #f57f17;
+            border: 2px solid #fff59d;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .theme-badge {
+            background: #e1bee7;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: #4a148c;
+            border: 2px solid #d1c4e9;
+        }
+
+        /* Progress Steps Indicator */
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            gap: 8px;
+        }
+
+        .progress-dot {
+            flex: 1;
+            height: 12px;
+            background-color: #e0e0e0;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .progress-dot.active {
+            background-color: #29b6f6;
+            box-shadow: 0 0 8px rgba(41, 182, 246, 0.5);
+        }
+
+        .progress-dot.completed {
+            background-color: #66bb6a;
+        }
+
+        /* Welcome & End Screen */
+        .screen {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        h1 {
+            color: #1b5e20;
+            font-size: 2.2rem;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .welcome-icon {
+            font-size: 5rem;
+            margin-bottom: 15px;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(46, 125, 50, 0.3);
+            transition: all 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(46, 125, 50, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+        }
+
+        /* Main Gameplay Interface */
+        .text-card {
+            background-color: #fafafa;
+            border-left: 6px solid #4caf50;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-size: 1.15rem;
+            line-height: 1.7;
+            text-align: justify;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .instruction-box {
+            background-color: #e3f2fd;
+            border-radius: 12px;
+            padding: 12px 20px;
+            margin-bottom: 25px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #1565c0;
+            border: 1px solid #bbdefb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Question Layout Slots */
+        .slots-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .slot-row {
+            display: flex;
+            align-items: stretch;
+            background: #f1f8e9;
+            border: 2px solid #d0e8c5;
+            border-radius: 14px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .slot-row.active-slot {
+            border-color: #29b6f6;
+            box-shadow: 0 0 10px rgba(41, 182, 246, 0.15);
+            background: #e1f5fe;
+        }
+
+        .slot-label {
+            padding: 15px;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 140px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .slot-label.utama {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+        }
+
+        .slot-label.sampingan {
+            background: linear-gradient(135deg, #009688 0%, #00796b 100%);
+        }
+
+        .slot-content {
+            padding: 15px 20px;
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #757575;
+            font-style: italic;
+        }
+
+        .slot-content.filled {
+            color: #2c3e50;
+            font-style: normal;
+            font-weight: 600;
+        }
+
+        /* Options Blocks Grid */
+        .options-headline {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #37474f;
+            text-align: left;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 650px) {
+            .options-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .option-card {
+            background: #ffffff;
+            border: 2px solid #cfd8dc;
+            border-radius: 14px;
+            padding: 15px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            line-height: 1.4;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .option-card:hover {
+            border-color: #78909c;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.04);
+        }
+
+        .option-card.correct {
+            background-color: #e8f5e9 !important;
+            border-color: #4caf50 !important;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+
+        .option-card.wrong {
+            background-color: #ffebee !important;
+            border-color: #ef5350 !important;
+            color: #c62828;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* Overlay Feedbacks */
+        .feedback-pop {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(255, 255, 255, 0.96);
+            padding: 25px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            z-index: 10;
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+        }
+
+        .feedback-pop.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        /* Styling for Trophy Screen */
+        .trophy-container {
+            margin: 20px 0;
+        }
+        .stars-row {
+            font-size: 3rem;
+            color: #ffca28;
+            margin-bottom: 10px;
+        }
+        .summary-box {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 12px;
+            max-width: 400px;
+            margin: 20px auto;
+            border: 1px dashed #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        
+        <!-- TOP STATUS BAR -->
+        <div class="top-bar" id="game-status-bar" style="display: none;">
+            <div class="theme-badge" id="theme-title">Tema: Pemanah Selamat</div>
+            <div class="score-board">Markah: <span id="live-score">0</span> / 140</div>
+        </div>
+
+        <!-- PROGRESS BAR -->
+        <div class="progress-container" id="progress-bar-zone" style="display: none;">
+            <!-- Dots generated by JS -->
+        </div>
+
+        <!-- SCREEN 1: WELCOME SCREEN -->
+        <div class="screen active" id="screen-welcome">
+            <span class="welcome-icon">🏹🌳</span>
+            <h1>Cabaran Pengembara Bijak!</h1>
+            <p style="font-size: 1.2rem; max-width: 600px; margin: 0 auto 25px auto; line-height: 1.6;">
+                Hai kawan-kawan! Jom kita uji kepakaran dalam menjejak <strong>Idea Utama</strong> dan <strong>Idea Sampingan</strong> bagi teks 'Pemanah Selamat' dan 'Meredah Hutan'. 
+            </p>
+            <div style="background: #e1f5fe; padding: 15px 25px; border-radius: 12px; display: inline-block; text-align: left; margin-bottom: 20px; border: 1px solid #b3e5fc;">
+                <h4 style="margin: 0 0 8px 0; color: #0288d1;">Aturan Permainan:</h4>
+                <ul style="margin: 0; padding-left: 20px; line-height: 1.5;">
+                    <li>Setiap perenggan mempunyai 1 Idea Utama & 1 Idea Sampingan.</li>
+                    <li>Pilih ayat yang paling tepat untuk memenuhkan kotak kosong.</li>
+                    <li>Markah penuh (10 mata) jika betul dalam 2 kali cubaan pertama!</li>
+                    <li>Boleh mencuba berkali-kali sehingga berjaya melompat ke tahap seterusnya.</li>
+                </ul>
+            </div>
+            <div>
+                <button class="btn-primary" onclick="startGame()">Mula Mengembara ✨</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: GAMEPLAY INTERFACE -->
+        <div class="screen" id="screen-game">
+            
+            <!-- Paragraph Text Display Box -->
+            <div class="text-card" id="paragraph-text-box">
+                <!-- Injected via JavaScript -->
+            </div>
+
+            <!-- Instruction Hint -->
+            <div class="instruction-box">
+                <span>💡</span>
+                <span id="instruction-text">Sila klik petak pilihan di bawah untuk memulakan cabaran.</span>
+            </div>
+
+            <!-- Drop/Fill Slots Display -->
+            <div class="slots-container">
+                <!-- Idea Utama Slot -->
+                <div class="slot-row" id="slot-row-utama" onclick="activateSlot('utama')">
+                    <div class="slot-label utama">IDEA UTAMA</div>
+                    <div class="slot-content" id="slot-content-utama">Klik di sini untuk pilih jawapan...</div>
+                </div>
+
+                <!-- Idea Sampingan Slot -->
+                <div class="slot-row" id="slot-row-sampingan" onclick="activateSlot('sampingan')">
+                    <div class="slot-label sampingan">IDEA SAMPINGAN</div>
+                    <div class="slot-content" id="slot-content-sampingan">Klik di sini untuk pilih jawapan...</div>
+                </div>
+            </div>
+
+            <!-- Choices/Options Grid -->
+            <div id="options-panel" style="display: none;">
+                <div class="options-headline" id="options-title-label">Pilihan Ayat Idea Utama:</div>
+                <div class="options-grid" id="options-buttons-container">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- SCREEN 3: GAME OVER / RESULTS -->
+        <div class="screen" id="screen-results">
+            <div class="trophy-container">
+                <span style="font-size: 5rem;">🏆</span>
+                <div class="stars-row" id="stars-output">⭐⭐⭐</div>
+            </div>
+            <h1 id="result-title">Hebat! Pengembara Ulung!</h1>
+            <p style="font-size: 1.3rem;">Kawan-kawan telah menamatkan semua cabaran dengan cemerlang!</p>
+            
+            <div class="summary-box">
+                <p style="font-size: 1.2rem; margin: 8px 0;">Jumlah Markah: <strong style="color:#2e7d32; font-size: 1.5rem;" id="final-score">0</strong> / 140</p>
+                <p id="performance-comment" style="font-weight: 500; color: #555;"></p>
+            </div>
+
+            <button class="btn-primary" onclick="restartGame()">Main Semula 🔄</button>
+        </div>
+
+        <!-- Audio feedback visualizer simulation trigger overlay -->
+        <div class="feedback-pop" id="audio-feedback-pop">🎉 BETUL!</div>
+
+    </div>
+
+    <script>
+        // --- GAME DATABASE (7 Paragraphs total based on textbook) ---
+        const gameData = [
+            {
+                textGroup: "Pemanah Selamat",
+                paragraphIndex: 1,
+                text: "Murid-murid, sila berikan perhatian. Sukan memanah ini banyak kebaikannya. Antaranya, meningkatkan hubungan mata dan tangan. Kekuatan otot jari dan tangan juga semakin bertambah.",
+                utama: {
+                    correct: "Sukan memanah mempunyai banyak kebaikannya.",
+                    options: [
+                        "Sukan memanah mempunyai banyak kebaikannya.",
+                        "Murid-murid perlu memberikan perhatian di padang.",
+                        "Kekuatan otot kaki sangat penting dalam sukan memanah.",
+                        "Sukan memanah melatih murid menjadi lebih berani."
+                    ]
+                },
+                sampingan: {
+                    correct: "Meningkatkan koordinasi mata-tangan dan menambahkan kekuatan otot jari serta tangan.",
+                    options: [
+                        "Sukan memanah menggunakan busur yang sangat berat.",
+                        "Meningkatkan koordinasi mata-tangan dan menambahkan kekuatan otot jari serta tangan.",
+                        "Murid digalakkan bermain memanah pada waktu petang bersama rakan.",
+                        "Kita perlu membeli peralatan memanah yang mahal di kedai sukan."
+                    ]
+                }
+            },
+            {
+                textGroup: "Pemanah Selamat",
+                paragraphIndex: 2,
+                text: "Untuk bermainnya, keselamatan pemanah perlu sentiasa diutamakan. Pemanah tidak boleh menarik tali busur dengan anak panah dan menghalakannya kepada orang lain. Pemanah juga tidak boleh melakukan panahan ke udara tanpa pengawasan jurulatih. Perbuatan melintas di hadapan atau di belakang papan sasaran sangat berbahaya.",
+                utama: {
+                    correct: "Keselamatan pemanah perlu sentiasa diutamakan semasa bermain.",
+                    options: [
+                        "Jurulatih mestilah sentiasa berdiri di sebelah papan sasaran.",
+                        "Memanah ke udara ialah cara bermain yang paling seronok.",
+                        "Keselamatan pemanah perlu sentiasa diutamakan semasa bermain.",
+                        "Papan sasaran perlu diletakkan di tempat yang sangat tinggi."
+                    ]
+                },
+                sampingan: {
+                    correct: "Tidak menghalakan anak panah kepada orang lain dan tidak melintas di kawasan sasaran.",
+                    options: [
+                        "Tidak menghalakan anak panah kepada orang lain dan tidak melintas di kawasan sasaran.",
+                        "Pemanah boleh berlatih bersendirian tanpa sebarang pengawasan.",
+                        "Tali busur hendaklah dihias dengan warna-warni yang terang.",
+                        "Murid-murid dilarang memakai kasut semasa berada di padang memanah."
+                    ]
+                }
+            },
+            {
+                textGroup: "Pemanah Selamat",
+                paragraphIndex: 3,
+                text: "Peralatan memanah perlu diperiksa supaya sentiasa selamat. Tali busur perlu ditarik beberapa kali sebelum menggunakannya. Tali busur mestilah dalam keadaan baik dan dipasang pada busur dengan betulnya. Pemanah perlu memastikan anak panah tidak retak atau pecah demi keselamatan pemanah.",
+                utama: {
+                    correct: "Peralatan memanah perlu diperiksa supaya sentiasa selamat.",
+                    options: [
+                        "Peralatan memanah perlu diperiksa supaya sentiasa selamat.",
+                        "Anak panah yang pecah boleh dibaiki semula menggunakan gam gajah.",
+                        "Tali busur yang putus boleh diganti dengan tali biasa sahaja.",
+                        "Sukan memanah menggunakan peralatan khas yang sangat sukar dicari."
+                    ]
+                },
+                sampingan: {
+                    correct: "Memastikan tali busur dipasang dengan betul dan anak panah tidak retak atau pecah.",
+                    options: [
+                        "Menarik tali busur sekuat hati sehingga ia mengeluarkan bunyi putus.",
+                        "Menyimpan semua peralatan memanah di dalam almari bilik darjah.",
+                        "Menggunakan anak panah yang sudah lama dan rosak untuk menjimatkan kos.",
+                        "Memastikan tali busur dipasang dengan betul dan anak panah tidak retak atau pecah."
+                    ]
+                }
+            },
+            {
+                textGroup: "Meredah Hutan",
+                paragraphIndex: 1,
+                text: "Imran dan keluarganya hendak berekreasi di Hutan Simpan Kota Damansara. Sebelum bertolak, mereka memeriksa barangan keperluan yang hendak dibawa. Ayahnya, Encik Ismail, memastikan bahawa tiada barangan keperluan yang tertinggal.",
+                utama: {
+                    correct: "Memeriksa barangan keperluan sebelum bertolak untuk berekreasi.",
+                    options: [
+                        "Hutan Simpan Kota Damansara ialah tempat rekreasi yang paling jauh.",
+                        "Memeriksa barangan keperluan sebelum bertolak untuk berekreasi.",
+                        "Imran suka mengumpul beg galas yang besar dan cantik untuk ke hutan.",
+                        "Encik Ismail memandu kereta dengan sangat laju untuk sampai ke destinasi."
+                    ]
+                },
+                sampingan: {
+                    correct: "Encik Ismail memastikan tiada barangan keperluan yang tertinggal.",
+                    options: [
+                        "Encik Ismail memastikan tiada barangan keperluan yang tertinggal.",
+                        "Imran membawa permainan video kegemarannya bersama-sama ke dalam hutan.",
+                        "Ibu menyediakan bekalan makanan yang sangat mewah untuk di makan.",
+                        "Mereka membeli tiket masuk di kaunter pendaftaran Hutan Simpan."
+                    ]
+                }
+            },
+            {
+                textGroup: "Meredah Hutan",
+                paragraphIndex: 2,
+                text: "Encik Ismail mengutamakan keselamatan keluarganya. Beliau memastikan mereka memakai pakaian yang sesuai. Mereka memakai baju berlengan panjang, berseluar panjang, berkasut dan bertopi. Mereka juga membawa air minuman yang secukupnya.",
+                utama: {
+                    correct: "Encik Ismail mengutamakan keselamatan keluarganya semasa masuk ke hutan.",
+                    options: [
+                        "Pakaian ke hutan mestilah berwarna-warni supaya mudah dilihat.",
+                        "Mengembara di dalam hutan tebal memerlukan kompas dan lampu suluh.",
+                        "Encik Ismail mengutamakan keselamatan keluarganya semasa masuk ke hutan.",
+                        "Imran memakai kasut sukan baharu kerana mahu berlari dengan laju."
+                    ]
+                },
+                sampingan: {
+                    correct: "Memakai pakaian yang sesuai dan membawa air minuman secukupnya.",
+                    options: [
+                        "Memakai pakaian yang sesuai dan membawa air minuman secukupnya.",
+                        "Memakai seluar pendek dan selipar nipis untuk mengelakkan rasa panas.",
+                        "Membawa makanan ringan yang manis dalam kuantiti yang amat banyak.",
+                        "Membeli topi baharu di kedai cenderamata sebelum masuk meredah denai."
+                    ]
+                }
+            },
+            {
+                textGroup: "Meredah Hutan",
+                paragraphIndex: 3,
+                text: "Semasa di sana, mereka melalui Denai Pengakap. Denai ini sesuai untuk pengunjung yang pertama kali ke hutan. Jarak perjalanan melalui denai ini lebih dekat berbanding dengan denai yang lain. Denai ini juga dilengkapi dengan papan tanda penunjuk arah.",
+                utama: {
+                    correct: "Denai Pengakap sangat sesuai untuk pengunjung yang pertama kali ke hutan.",
+                    options: [
+                        "Imran bercita-cita mahu menjadi seorang ahli pengakap sekolah yang hebat.",
+                        "Semua denai di dalam hutan simpan sangat gelap dan menakutkan pengunjung.",
+                        "Denai Pengakap sangat sesuai untuk pengunjung yang pertama kali ke hutan.",
+                        "Papan tanda di dalam hutan dibuat menggunakan kayu bermutu tinggi."
+                    ]
+                },
+                sampingan: {
+                    correct: "Jarak perjalanan denai ini lebih dekat dan dilengkapi papan tanda penunjuk arah.",
+                    options: [
+                        "Terdapat banyak haiwan liar yang jinak dan bebas di sepanjang denai.",
+                        "Jarak perjalanan denai ini lebih dekat dan dilengkapi papan tanda penunjuk arah.",
+                        "Pengunjung dikehendaki membayar wang tambahan untuk menggunakan denai.",
+                        "Denai ini mempunyai jalan berturap yang luas untuk kemudahan kenderaan."
+                    ]
+                }
+            },
+            {
+                textGroup: "Meredah Hutan",
+                paragraphIndex: 4,
+                text: "Mereka sekeluarga selamat tiba di lokasi penamat. Mereka gembira walaupun kepenatan. Encik Ismail bangga kerana semua anggota keluarganya mematuhi peraturan keselamatan.",
+                utama: {
+                    correct: "Imran sekeluarga telah selamat tiba di lokasi penamat.",
+                    options: [
+                        "Imran sekeluarga telah selamat tiba di lokasi penamat.",
+                        "Berehat di bawah pokok besar boleh menghilangkan rasa penat dan mengantuk.",
+                        "Encik Ismail mengajak keluarganya untuk melawat ke destinasi lain pula.",
+                        "Peraturan keselamatan di dalam hutan simpan adakalanya menyusahkan."
+                    ]
+                },
+                sampingan: {
+                    correct: "Mereka gembira dan bapa bangga kerana semua mematuhi peraturan keselamatan.",
+                    options: [
+                        "Imran menangis teresak-esak kerana kakinya terluka akibat digigit pacat.",
+                        "Encik Ismail memberikan hadiah berupa wang tunai kepada anak-anaknya.",
+                        "Mereka gembira dan bapa bangga kerana semua mematuhi peraturan keselamatan.",
+                        "Mereka membina sebuah khemah perkhemahan yang besar di lokasi tersebut."
+                    ]
+                }
+            }
+        ];
+
+        // --- GAME ENGINE STATE ---
+        let currentIndex = 0; 
+        let activeType = null; // 'utama' atau 'sampingan'
+        let currentAttempts = 0;
+        let totalScore = 0;
+        let isUtamaCorrect = false;
+        let isSampinganCorrect = false;
+
+        // --- WEB AUDIO API SYNTHESIZER ---
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            initAudio();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+            
+            if (type === 'correct') {
+                // Playful celebratory sparkly sound (Arpeggio Major)
+                const frequencies = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                frequencies.forEach((f, i) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(f, now + i * 0.08);
+                    
+                    gain.gain.setValueAtTime(0.15, now + i * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.3);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    osc.start(now + i * 0.08);
+                    osc.stop(now + i * 0.08 + 0.35);
+                });
+            } else if (type === 'wrong') {
+                // Funny comic "angry/buzzer" descending low tone
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(90, now + 0.4);
+                
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.001, now + 0.4);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
+        }
+
+        // --- INTERACTIVE MECHANICS ---
+        function startGame() {
+            document.getElementById('screen-welcome').classList.remove('active');
+            document.getElementById('screen-game').classList.add('active');
+            document.getElementById('game-status-bar').style.display = 'flex';
+            document.getElementById('progress-bar-zone').style.display = 'flex';
+            
+            currentIndex = 0;
+            totalScore = 0;
+            buildProgressBar();
+            loadParagraph();
+        }
+
+        function buildProgressBar() {
+            const bar = document.getElementById('progress-bar-zone');
+            bar.innerHTML = '';
+            for (let i = 0; i < gameData.length; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'progress-dot';
+                if (i === 0) dot.className = 'progress-dot active';
+                dot.id = `dot-${i}`;
+                bar.appendChild(dot);
+            }
+        }
+
+        function updateProgressBar() {
+            for (let i = 0; i < gameData.length; i++) {
+                const dot = document.getElementById(`dot-${i}`);
+                if (!dot) continue;
+                if (i < currentIndex) {
+                    dot.className = 'progress-dot completed';
+                } else if (i === currentIndex) {
+                    dot.className = 'progress-dot active';
+                } else {
+                    dot.className = 'progress-dot';
+                }
+            }
+        }
+
+        function loadParagraph() {
+            const data = gameData[currentIndex];
+            
+            // Set header theme context
+            document.getElementById('theme-title').innerText = `Tema: ${data.textGroup} (P.${data.paragraphIndex})`;
+            document.getElementById('paragraph-text-box').innerHTML = `<strong>Perenggan ${data.paragraphIndex}:</strong><br>${data.text}`;
+            
+            // Reset slots display states
+            document.getElementById('slot-content-utama').innerText = "Klik di sini untuk pilih jawapan...";
+            document.getElementById('slot-content-utama').classList.remove('filled');
+            document.getElementById('slot-content-sampingan').innerText = "Klik di sini untuk pilih jawapan...";
+            document.getElementById('slot-content-sampingan').classList.remove('filled');
+            
+            document.getElementById('slot-row-utama').classList.remove('active-slot');
+            document.getElementById('slot-row-sampingan').classList.remove('active-slot');
+            
+            // State resets
+            isUtamaCorrect = false;
+            isSampinganCorrect = false;
+            activeType = null;
+            
+            document.getElementById('options-panel').style.display = 'none';
+            document.getElementById('instruction-text').innerText = "Sila klik petak pilihan di bawah (Idea Utama dahulu digalakkan).";
+            
+            updateProgressBar();
+        }
+
+        function activateSlot(type) {
+            if (type === 'utama' && isUtamaCorrect) return; // already done
+            if (type === 'sampingan' && isSampinganCorrect) return; // already done
+            
+            activeType = type;
+            currentAttempts = 0; // reset attempts specifically for this active item choice
+            
+            // Update active styling tags
+            if (type === 'utama') {
+                document.getElementById('slot-row-utama').classList.add('active-slot');
+                document.getElementById('slot-row-sampingan').classList.remove('active-slot');
+                document.getElementById('options-title-label').innerText = "🤔 Pilih ayat yang paling tepat untuk IDEA UTAMA:";
+            } else {
+                document.getElementById('slot-row-sampingan').classList.add('active-slot');
+                document.getElementById('slot-row-utama').classList.remove('active-slot');
+                document.getElementById('options-title-label').innerText = "💡 Pilih ayat huraian/contoh untuk IDEA SAMPINGAN:";
+            }
+            
+            document.getElementById('instruction-text').innerText = `Sila baca 4 pilihan ayat di bawah dan pilih jawapan paling benar.`;
+            
+            // Render options random / ordered lists
+            renderOptions();
+        }
+
+        function renderOptions() {
+            const panel = document.getElementById('options-panel');
+            const container = document.getElementById('options-buttons-container');
+            container.innerHTML = '';
+            
+            const itemData = gameData[currentIndex][activeType];
+            
+            itemData.options.forEach((optText) => {
+                const card = document.createElement('div');
+                card.className = 'option-card';
+                card.innerText = optText;
+                card.onclick = () => checkAnswer(card, optText, itemData.correct);
+                container.appendChild(card);
+            });
+            
+            panel.style.display = 'block';
+        }
+
+        function checkAnswer(element, chosen, correct) {
+            // Avoid clicking after winning state
+            if (activeType === 'utama' && isUtamaCorrect) return;
+            if (activeType === 'sampingan' && isSampinganCorrect) return;
+            
+            currentAttempts++;
+            const pop = document.getElementById('audio-feedback-pop');
+            
+            if (chosen === correct) {
+                // Correct path handler
+                playSound('correct');
+                element.className = 'option-card correct';
+                
+                pop.innerText = "🎉 JAWAPAN BETUL!";
+                pop.style.color = "#2e7d32";
+                pop.classList.add('show');
+                
+                // Score Calculations
+                if (currentAttempts <= 2) {
+                    totalScore += 10;
+                    document.getElementById('live-score').innerText = totalScore;
+                }
+                
+                setTimeout(() => {
+                    pop.classList.remove('show');
+                    applySlotSuccess(correct);
+                }, 1000);
+                
+            } else {
+                // Mistake Path handler
+                playSound('wrong');
+                element.className = 'option-card wrong';
+                
+                pop.innerText = "💥 Alamak, Cuba Lagi!";
+                pop.style.color = "#d32f2f";
+                pop.classList.add('show');
+                
+                setTimeout(() => {
+                    pop.classList.remove('show');
+                    element.classList.remove('wrong');
+                }, 1000);
+            }
+        }
+
+        function applySlotSuccess(correctText) {
+            if (activeType === 'utama') {
+                isUtamaCorrect = true;
+                const slot = document.getElementById('slot-content-utama');
+                slot.innerText = correctText;
+                slot.classList.add('filled');
+                document.getElementById('slot-row-utama').classList.remove('active-slot');
+            } else {
+                isSampinganCorrect = true;
+                const slot = document.getElementById('slot-content-sampingan');
+                slot.innerText = correctText;
+                slot.classList.add('filled');
+                document.getElementById('slot-row-sampingan').classList.remove('active-slot');
+            }
+            
+            document.getElementById('options-panel').style.display = 'none';
+            
+            // Check if both elements in this paragraph are answered correctly
+            if (isUtamaCorrect && isSampinganCorrect) {
+                document.getElementById('instruction-text').innerText = "Syabas! Perenggan ini selesai. Sedia untuk perenggan seterusnya!";
+                setTimeout(() => {
+                    advanceNext();
+                }, 1500);
+            } else {
+                document.getElementById('instruction-text').innerText = "Bagus! Sila lengkapkan satu lagi petak kosong yang tinggal.";
+            }
+        }
+
+        function advanceNext() {
+            currentIndex++;
+            if (currentIndex < gameData.length) {
+                loadParagraph();
+            } else {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            document.getElementById('screen-game').classList.remove('active');
+            document.getElementById('screen-results').classList.add('active');
+            document.getElementById('game-status-bar').style.display = 'none';
+            document.getElementById('progress-bar-zone').style.display = 'none';
+            
+            document.getElementById('final-score').innerText = totalScore;
+            
+            // Determine Stars rating system output based on score milestones
+            const stars = document.getElementById('stars-output');
+            const title = document.getElementById('result-title');
+            const comment = document.getElementById('performance-comment');
+            
+            if (totalScore >= 120) {
+                stars.innerText = "⭐⭐⭐";
+                title.innerText = "🏆 Hebat! Pengembara Ulung!";
+                comment.innerText = "Luar biasa bijak! Kamu sangat mahir dalam membezakan antara Idea Utama dan Idea Sampingan dengan sangat cepat!";
+            } else if (totalScore >= 80) {
+                stars.innerText = "⭐⭐";
+                title.innerText = "🌟 Pakar Idea Yang Bijak!";
+                comment.innerText = "Bagus sekali! Pemahaman membaca kamu berada pada tahap yang amat kukuh dan membanggakan!";
+            } else {
+                stars.innerText = "⭐";
+                title.innerText = "🎯 Usaha Tangga Kejayaan!";
+                comment.innerText = "Tahniah kerana berjaya menamatkan pengembaraan. Jom main sekali lagi untuk mendapatkan skor penuh bintang tiga!";
+            }
+        }
+
+        function restartGame() {
+            document.getElementById('screen-results').classList.remove('active');
+            startGame();
+        }
+    </script>
+
+</body>
+</html>
